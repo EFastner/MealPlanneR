@@ -1,7 +1,3 @@
----
-title: "MealPlanneR"
----
-
 ## Overview
 MealPlanneR is a Shiny application intended to create a daily meal plan. Ultimately, this will also be an application for generating a shopping list based on that meal plan as well
 
