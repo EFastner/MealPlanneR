@@ -4,83 +4,73 @@ library(lubridate)
 
 source('R/initialize.R')
 
-# Define UI for application that draws a histogram
 ui <- navbarPage(
   title = 'MealPlanneR'
+#----------------------Page 1, Plan Meals-------------------------  
   , tabPanel(
     title = 'Plan Meals'
     ,
     sidebarLayout(
       sidebarPanel(
-        dateInput(
-          inputId = 'in_startdate'
-          , label = 'Start Date'
-          , value = today() + 1
+        #----------------------Sidebar Welcome-------------------------
+        p(HTML('<b>Welcome to MealPlanneR!<br>Start by Making Your Selections Below</b>'), align = 'center')
+        #----------------------Date Input-------------------------
+        , dateRangeInput(
+          inputId = 'in_DateRange'
+          , label = 'Dates to Plan'
+          , start = today() + 1
+          , end = today() + 6
+          , max = today() + 30
           , format = 'm/d/yyyy'
+        )
+        #----------------------Which Meals to Plan-------------------------
+        , checkboxGroupInput(
+          inputId = 'in_meal_to_plan'
+          , label = 'Which Meals to Plan?'
+          , choices = c('Breakfast', 'Lunch', 'Dinner')
+          , selected = c('Breakfast', 'Lunch', 'Dinner')
+          , inline = TRUE
         )
         , width = 2
       ),
       mainPanel(
-        # h2(tags$b(textOutput('date0'))),
-        # f_dayplan_inputs(0, 1),
-        # f_dayplan_inputs(0, 2),
-        # f_dayplan_inputs(0, 3)
-        # , h2(tags$b(textOutput('date1'))),
-        # f_dayplan_inputs(1, 1),
-        # f_dayplan_inputs(1, 2),
-        # f_dayplan_inputs(1, 3),
-        # h2(tags$b(textOutput('date2'))),
-        # f_dayplan_inputs(2, 1),
-        # f_dayplan_inputs(2, 2),
-        # f_dayplan_inputs(2, 3),
-        # h2(tags$b(textOutput('date3'))),
-        # f_dayplan_inputs(3, 1),
-        # f_dayplan_inputs(3, 2),
-        # f_dayplan_inputs(3, 3),
-        # h2(tags$b(textOutput('date4'))),
-        # f_dayplan_inputs(4, 1),
-        # f_dayplan_inputs(4, 2),
-        # f_dayplan_inputs(4, 3),
-        # h2(tags$b(textOutput('date5'))),
-        # f_dayplan_inputs(5, 1),
-        # f_dayplan_inputs(5, 2),
-        # f_dayplan_inputs(5, 3),
-        # h2(tags$b(textOutput('date6'))),
-        # f_dayplan_inputs(6, 1),
-        # f_dayplan_inputs(6, 2),
-        # f_dayplan_inputs(6, 3)
         uiOutput('meal_inputs')
         , width = 10
       )
       , fluid = TRUE
     )
   )
+#----------------------Page 2, Shopping List-------------------------  
   , tabPanel(
     title = 'Shopping'
-    , tableOutput('meal_list')
+    , h1('IN PROGRESS')
   )
   , fluid = TRUE
 )
+
 server <- function(input, output, session) {
   
   output$meal_inputs <- renderUI({
     # Creates all of the inputs for each date and mealtime
     
-    lapply(0:6, function(i){
+    plan_days <- 
+      input$in_DateRange[[2]] - input$in_DateRange[[1]]
+    
+    lapply(0:plan_days, function(i){
       # Loop through each date and create date title/inputs
       
-      date_offset <- input$in_startdate + i
+      date_offset <- input$in_DateRange[[1]]
       
       fluidPage(
         # Date for inputs
         fluidRow(
           column(12
-                 , HTML(paste0('<h2>', input$in_startdate + i, '</h2>'))
+                 , HTML(paste0('<h2>', input$in_DateRange[[1]] + i, '</h2>'))
           )
         )
         
         # Loop through all meals and create inputs
-        , lapply(c('breakfast', 'lunch', 'dinner'), function(meal_var){
+        , lapply(str_to_lower(input$in_meal_to_plan), function(meal_var){
           
           # Filter on Meals
           meal_list <- 
@@ -128,16 +118,6 @@ server <- function(input, output, session) {
         })
       )
     })
-  })
-  
-  output$meal_list <- renderTable({
-    tibble(
-      meal = lapply(0:6, function(i){
-        date_offset <- input$in_startdate + i
-        
-        input[[paste0('in_breakfast_choice_', date_offset)]]  
-      })
-    )
   })
   
 }
